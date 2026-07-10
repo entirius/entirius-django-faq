@@ -1,0 +1,11 @@
+app_label: django_faq
+groups:
+  - name: faq-core
+    title: "FAQ Core"
+    models:
+      - FaqChannel
+      - FaqGroup
+      - FaqGroupT9N
+      - FaqItem
+      - FaqItemT9N
+      - FaqAssociation
