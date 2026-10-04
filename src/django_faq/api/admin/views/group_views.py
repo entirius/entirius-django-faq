@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 class GroupViewSet(viewsets.ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
+    access_area = "faq.faq"
     pagination_class = AdminPageNumberPagination
 
     def list(self, request: Request, channel_idx: str = None, **kwargs) -> Response:

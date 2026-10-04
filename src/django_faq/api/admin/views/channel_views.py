@@ -23,6 +23,7 @@ from django_faq.services import channel_service
 class ChannelViewSet(viewsets.ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
+    access_area = "faq.faq"
     pagination_class = AdminPageNumberPagination
 
     def list(self, request: Request, **kwargs) -> Response:
