@@ -18,6 +18,7 @@ from django_faq.services import association_service
 class DiscoverViewSet(viewsets.ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
+    access_area = "faq.faq"
 
     @extend_schema(
         summary="Discover entities for FAQ associations",
