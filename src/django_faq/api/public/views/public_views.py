@@ -88,7 +88,10 @@ def _build_public_item(
 @extend_schema_view(
     list=extend_schema(
         summary="List active FAQ items",
+        description="Returns one page of the active FAQ items of the channel, with texts resolved for the "
+        "requested language. Called by the storefront.",
         tags=["FAQ Public"],
+        responses=PublicFaqItemResponse,
         parameters=[
             OpenApiParameter(name="channel_idx", location="path", description="Channel identifier"),
             OpenApiParameter(name="language", description="Language ISO2 for translation resolution"),
@@ -104,7 +107,16 @@ def _build_public_item(
             OpenApiParameter(name="entity_id", description="Filter by entity identifier"),
         ],
     ),
-    retrieve=extend_schema(summary="Retrieve FAQ item by url_key", tags=["FAQ Public"]),
+    retrieve=extend_schema(
+        summary="Retrieve FAQ item by url_key",
+        description="Returns one active FAQ item with its previous and next neighbours. Called by the storefront.",
+        tags=["FAQ Public"],
+        parameters=[
+            OpenApiParameter(name="channel_idx", location="path", description="Channel identifier"),
+            OpenApiParameter(name="url_key", location="path", description="URL key of the item"),
+            OpenApiParameter(name="language", description="Language ISO2 for translation resolution"),
+        ],
+    ),
 )
 class PublicItemViewSet(viewsets.ViewSet):
     authentication_classes = []
@@ -155,6 +167,8 @@ class PublicItemViewSet(viewsets.ViewSet):
 @extend_schema_view(
     list=extend_schema(
         summary="List active FAQ groups",
+        description="Returns one page of the active FAQ groups of the channel with their item counts, with names "
+        "resolved for the requested language. Called by the storefront.",
         tags=["FAQ Public"],
         parameters=[
             OpenApiParameter(name="channel_idx", location="path", description="Channel identifier"),

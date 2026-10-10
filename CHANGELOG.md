@@ -4,6 +4,8 @@
 
 - Access: the module declares its own access areas on its AppConfig and its admin views (copied from the
   entirius-django-access defaults; behaviour unchanged).
+- OpenAPI: the three paginated lists are generated as `…_list` operations and document their paginated response;
+  every operation and the storefront path parameters have a description. Metadata only.
 
 ## 2.0.0 — 2026-07-10
 

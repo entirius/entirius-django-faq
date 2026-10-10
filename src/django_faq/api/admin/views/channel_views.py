@@ -18,7 +18,11 @@ from django_faq.services import channel_service
 
 
 @extend_schema_view(
-    list=extend_schema(summary="List FAQ channels", tags=["FAQ Channels"]),
+    list=extend_schema(
+        summary="List FAQ channels",
+        description="Returns every FAQ channel with its languages and default language. Called by the admin panel.",
+        tags=["FAQ Channels"],
+    ),
 )
 class ChannelViewSet(viewsets.ViewSet):
     authentication_classes = [JWTAuthentication]
