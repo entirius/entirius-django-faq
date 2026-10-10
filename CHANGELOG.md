@@ -6,6 +6,8 @@
   entirius-django-access defaults; behaviour unchanged).
 - OpenAPI: the three paginated lists are generated as `…_list` operations and document their paginated response;
   every operation and the storefront path parameters have a description. Metadata only.
+- Optional sibling apps that are installed but not enabled no longer crash imports (`RuntimeError` is caught like
+  `ImportError`).
 
 ## 2.0.0 — 2026-07-10
 
