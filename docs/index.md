@@ -32,7 +32,7 @@ FAQ is the first Volkanos module to formalise the soft dependency pattern. It wo
 | `django_pim` | Product/category associations accept any string, no validation | SKU and category idx validated on save, autocomplete in admin API |
 | `django_contentdb` | Blog post and page associations unvalidated | Route slug validated, autocomplete in admin API |
 
-All conditional imports live in `association_service.py` behind `try/except ImportError`. Nothing at module level touches PIM or ContentDB. The discover endpoint returns `{"results": []}` when optional deps are absent — the CMS shows a plain text input instead of an autocomplete picker.
+All conditional imports live in `association_service.py` behind `try/except (ImportError, RuntimeError)`. Nothing at module level touches PIM or ContentDB. The discover endpoint returns `{"results": []}` when an optional dependency is absent or installed but not in `INSTALLED_APPS` — the CMS shows a plain text input instead of an autocomplete picker.
 
 ## Channel Scoping
 

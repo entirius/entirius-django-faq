@@ -48,6 +48,8 @@ Layer rule: `API → Services → Models → DB`. No ORM in views.
 ## Gotchas
 
 - Entity references are soft: `django_pim` / `django_contentdb` imports are lazy with
-  `try/except ImportError` fallbacks — validation passes and discovery returns empty when absent.
-- `channel_service.sync_channels_from_pim()` is a no-op (returns 0) when `django_pim` is not installed.
+  `try/except (ImportError, RuntimeError)` fallbacks — validation passes and discovery returns empty when the app
+  is absent or installed but not in `INSTALLED_APPS`.
+- `channel_service.sync_channels_from_pim()` is a no-op (returns 0) when `django_pim` is not installed or not
+  enabled.
 - T9N resolution falls back: requested language → channel default language → base item fields.
