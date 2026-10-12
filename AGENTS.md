@@ -1,6 +1,6 @@
 # AGENTS.md
 
-FAQ module for Volkanos — distribution `entirius-django-faq`, Django app `django_faq`.
+FAQ module of Entirius — distribution `entirius-django-faq`, Django app `django_faq`.
 Structured Q&A with soft entity references, T9N translations, image support and group management.
 
 ## Commands
@@ -20,7 +20,10 @@ Structured Q&A with soft entity references, T9N translations, image support and 
 - Git flow: `master` (production) + `develop` (integration); changes land via PR; semver tag on `master`.
 - Never rename the package / Django app_label / DB table prefix `django_faq` — it is a schema contract.
 - Migrations are part of the public contract — never edit an already released migration.
+- Access: areas live on the AppConfig (`access_areas`, `access_route_rules`), every admin view carries
+  `access_area`; a new admin route without one fails `tests/test_access_ownership.py`.
 - Default: do not commit — git is the user's call.
+- No AI attribution in commits or PR descriptions.
 
 ## Architecture
 
@@ -32,11 +35,21 @@ Structured Q&A with soft entity references, T9N translations, image support and 
 - `schemas/` — pydantic request/response models.
 - `api/` — `admin/` (v2, JWT + IsAdminUser) and `public/` (v2, AllowAny, channel-scoped).
 
+- `management/commands/` — `import_faq` (CSV import), `sync_faq_channels` (channels from PIM).
+
 Layer rule: `API → Services → Models → DB`. No ORM in views.
+
+| Topic | Where |
+|---|---|
+| Overview, soft dependencies, channel scoping, public API | `docs/index.md` |
+| Data model, T9N resolution | `docs/data-model.md` |
+| ERD config for the docs ERD generator | `docs/erd-config.yaml` |
 
 ## Gotchas
 
 - Entity references are soft: `django_pim` / `django_contentdb` imports are lazy with
-  `try/except ImportError` fallbacks — validation passes and discovery returns empty when absent.
-- `channel_service.sync_channels_from_pim()` is a no-op (returns 0) when `django_pim` is not installed.
+  `try/except (ImportError, RuntimeError)` fallbacks — validation passes and discovery returns empty when the app
+  is absent or installed but not in `INSTALLED_APPS`.
+- `channel_service.sync_channels_from_pim()` is a no-op (returns 0) when `django_pim` is not installed or not
+  enabled.
 - T9N resolution falls back: requested language → channel default language → base item fields.

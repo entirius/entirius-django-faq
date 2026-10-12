@@ -1,0 +1,23 @@
+# Changelog
+
+## 2.1.0 — 2026-10-12
+
+- Access: the module declares its own access areas on its AppConfig and its admin views (copied from the
+  entirius-django-access defaults; behaviour unchanged).
+- OpenAPI: the three paginated lists are generated as `…_list` operations and document their paginated response;
+  every operation and the storefront path parameters have a description. Metadata only.
+- Optional sibling apps that are installed but not enabled no longer crash imports (`RuntimeError` is caught like
+  `ImportError`).
+
+## 2.0.0 — 2026-07-10
+
+- Initial public release: structured Q&A with groups, per-language T9N
+  (question / answer / short_answer / url_key), soft entity associations
+  (PIM products and categories, ContentDB posts and pages), and channel
+  scoping (Pattern 2).
+- Admin v2 API (JWT + IsAdminUser) and public API with 3-level translation
+  fallback, `?search=` and allowlisted `?sort=`.
+- `alternates` per-locale slug map for hreflang, and `prev`/`next` neighbour
+  links on item retrieve for in-topic navigation.
+- Grouped CSV import via the `import_faq` management command.
+- Migrations squashed into a single initial migration for the Entirius epoch.

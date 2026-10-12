@@ -34,11 +34,12 @@ def discover_entities(entity_type: str, search: str, limit: int = 20) -> list[di
 
 
 def _validate_product(identifier: str) -> bool:
+    # RuntimeError: an app that is installed but not in INSTALLED_APPS raises it on model import, not ImportError.
     try:
         from django_pim.models import RealProduct
 
         return RealProduct.objects.filter(sku__iexact=identifier).exists()
-    except ImportError:
+    except (ImportError, RuntimeError):
         return True
 
 
@@ -47,7 +48,7 @@ def _validate_category(identifier: str) -> bool:
         from django_pim.models import Category
 
         return Category.objects.filter(idx__iexact=identifier).exists()
-    except ImportError:
+    except (ImportError, RuntimeError):
         return True
 
 
@@ -56,7 +57,7 @@ def _validate_blog_post(identifier: str) -> bool:
         from django_contentdb.models import Route
 
         return Route.objects.filter(url=identifier).exists()
-    except ImportError:
+    except (ImportError, RuntimeError):
         return True
 
 
@@ -67,7 +68,7 @@ def _discover_products(search: str, limit: int) -> list[dict]:
 
         qs = RealProduct.objects.filter(Q(sku__icontains=search) | Q(name__icontains=search))[:limit]
         return [{"identifier": p.sku, "label": f"{p.sku} — {p.name}"} for p in qs]
-    except ImportError:
+    except (ImportError, RuntimeError):
         return []
 
 
@@ -78,7 +79,7 @@ def _discover_categories(search: str, limit: int) -> list[dict]:
 
         qs = Category.objects.filter(Q(idx__icontains=search) | Q(name_t9n__icontains=search))[:limit]
         return [{"identifier": c.idx, "label": c.idx} for c in qs]
-    except ImportError:
+    except (ImportError, RuntimeError):
         return []
 
 
@@ -88,5 +89,5 @@ def _discover_blog_posts(search: str, limit: int) -> list[dict]:
 
         qs = Route.objects.filter(url__icontains=search)[:limit]
         return [{"identifier": r.url, "label": r.url} for r in qs]
-    except ImportError:
+    except (ImportError, RuntimeError):
         return []

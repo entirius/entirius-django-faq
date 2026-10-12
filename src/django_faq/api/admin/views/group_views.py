@@ -22,7 +22,7 @@ from django_faq.api.admin.pagination import AdminPageNumberPagination
 from django_faq.api.admin.permissions import IsAdminUser
 from django_faq.schemas.requests.group import FaqGroupCreateRequest, FaqGroupUpdateRequest, GroupReorderRequest
 from django_faq.schemas.requests.t9n import FaqGroupT9NCreateRequest, FaqGroupT9NUpdateRequest
-from django_faq.schemas.responses.group import FaqGroupT9NResponse
+from django_faq.schemas.responses.group import FaqGroupResponse, FaqGroupT9NResponse
 from django_faq.services import group_service
 
 logger = logging.getLogger(__name__)
@@ -31,21 +31,44 @@ logger = logging.getLogger(__name__)
 @extend_schema_view(
     list=extend_schema(
         summary="List FAQ groups",
+        description="Returns one page of the FAQ groups visible in the channel, each with its channels, "
+        "translations and item count. Called by the admin panel.",
         tags=["FAQ Groups"],
+        responses=FaqGroupResponse,
         parameters=[
             OpenApiParameter(name="channel_idx", location="path", description="Channel identifier"),
             OpenApiParameter(name="search", description="Search by name or idx"),
             OpenApiParameter(name="is_active", description="Filter by active status", type=bool),
         ],
     ),
-    retrieve=extend_schema(summary="Retrieve FAQ group", tags=["FAQ Groups"]),
-    create=extend_schema(summary="Create FAQ group", tags=["FAQ Groups"]),
-    partial_update=extend_schema(summary="Update FAQ group", tags=["FAQ Groups"]),
-    destroy=extend_schema(summary="Delete FAQ group", tags=["FAQ Groups"]),
+    retrieve=extend_schema(
+        summary="Retrieve FAQ group",
+        description="Returns one FAQ group by its idx, with its channels, translations and item count. "
+        "Called by the admin panel.",
+        tags=["FAQ Groups"],
+    ),
+    create=extend_schema(
+        summary="Create FAQ group",
+        description="Creates a FAQ group and assigns it to the given channels. The idx must be unique. "
+        "Called by the admin panel.",
+        tags=["FAQ Groups"],
+    ),
+    partial_update=extend_schema(
+        summary="Update FAQ group",
+        description="Changes the fields sent in the body and leaves the rest as they are. Called by the admin panel.",
+        tags=["FAQ Groups"],
+    ),
+    destroy=extend_schema(
+        summary="Delete FAQ group",
+        description="Deletes the group and its translations. Its items stay and become ungrouped. "
+        "Called by the admin panel.",
+        tags=["FAQ Groups"],
+    ),
 )
 class GroupViewSet(viewsets.ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
+    access_area = "faq.faq"
     pagination_class = AdminPageNumberPagination
 
     def list(self, request: Request, channel_idx: str = None, **kwargs) -> Response:
@@ -103,7 +126,12 @@ class GroupViewSet(viewsets.ViewSet):
             return Response({"detail": "Group not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(summary="Reorder FAQ groups", tags=["FAQ Groups"])
+    @extend_schema(
+        summary="Reorder FAQ groups",
+        description="Sets the position of each group from the order of the idx list in the body. "
+        "Called by the admin panel.",
+        tags=["FAQ Groups"],
+    )
     @action(detail=False, methods=["patch"], url_path="reorder")
     def reorder(self, request: Request, channel_idx: str = None, **kwargs) -> Response:
         try:
@@ -115,14 +143,22 @@ class GroupViewSet(viewsets.ViewSet):
 
     # --- T9N ---
 
-    @extend_schema(summary="List group translations", tags=["FAQ Groups"])
+    @extend_schema(
+        summary="List group translations",
+        description="Returns the translated names of the group, one entry per language. Called by the admin panel.",
+        tags=["FAQ Groups"],
+    )
     @action(detail=True, methods=["get"], url_path="translations", url_name="translations-list")
     def translations_list(self, request: Request, channel_idx: str = None, idx: str = None, **kwargs) -> Response:
         t9ns = group_service.list_group_translations(group_idx=idx)
         results = [FaqGroupT9NResponse(language=t.language.iso2, name=t.name).model_dump() for t in t9ns]
         return Response(results, status=status.HTTP_200_OK)
 
-    @extend_schema(summary="Create group translation", tags=["FAQ Groups"])
+    @extend_schema(
+        summary="Create group translation",
+        description="Adds the group name in one more language. Called by the admin panel.",
+        tags=["FAQ Groups"],
+    )
     @action(detail=True, methods=["post"], url_path="translations/create", url_name="translations-create")
     def translations_create(self, request: Request, channel_idx: str = None, idx: str = None, **kwargs) -> Response:
         try:
@@ -134,7 +170,11 @@ class GroupViewSet(viewsets.ViewSet):
             FaqGroupT9NResponse(language=t9n.language.iso2, name=t9n.name).model_dump(), status=status.HTTP_201_CREATED
         )
 
-    @extend_schema(summary="Update group translation", tags=["FAQ Groups"])
+    @extend_schema(
+        summary="Update group translation",
+        description="Changes the group name stored for the language in the path. Called by the admin panel.",
+        tags=["FAQ Groups"],
+    )
     @action(
         detail=True, methods=["patch"], url_path=r"translations/(?P<language>[a-z]{2})", url_name="translations-update"
     )
@@ -151,7 +191,11 @@ class GroupViewSet(viewsets.ViewSet):
             FaqGroupT9NResponse(language=t9n.language.iso2, name=t9n.name).model_dump(), status=status.HTTP_200_OK
         )
 
-    @extend_schema(summary="Delete group translation", tags=["FAQ Groups"])
+    @extend_schema(
+        summary="Delete group translation",
+        description="Removes the group name stored for the language in the path. Called by the admin panel.",
+        tags=["FAQ Groups"],
+    )
     @action(
         detail=True,
         methods=["delete"],
