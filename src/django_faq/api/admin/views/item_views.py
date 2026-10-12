@@ -22,7 +22,7 @@ from django_faq.api.admin.pagination import AdminPageNumberPagination
 from django_faq.api.admin.permissions import IsAdminUser
 from django_faq.schemas.requests.item import FaqItemCreateRequest, FaqItemUpdateRequest, ItemReorderRequest
 from django_faq.schemas.requests.t9n import FaqItemT9NCreateRequest, FaqItemT9NUpdateRequest
-from django_faq.schemas.responses.item import FaqItemT9NResponse
+from django_faq.schemas.responses.item import FaqItemResponse, FaqItemT9NResponse
 from django_faq.services import item_service
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,10 @@ logger = logging.getLogger(__name__)
 @extend_schema_view(
     list=extend_schema(
         summary="List FAQ items",
+        description="Returns one page of the FAQ items visible in the channel, each with its group, translations "
+        "and associations. Called by the admin panel.",
         tags=["FAQ Items"],
+        responses=FaqItemResponse,
         parameters=[
             OpenApiParameter(name="channel_idx", location="path", description="Channel identifier"),
             OpenApiParameter(name="search", description="Search by question or url_key"),
@@ -39,10 +42,29 @@ logger = logging.getLogger(__name__)
             OpenApiParameter(name="is_active", description="Filter by active status", type=bool),
         ],
     ),
-    retrieve=extend_schema(summary="Retrieve FAQ item", tags=["FAQ Items"]),
-    create=extend_schema(summary="Create FAQ item", tags=["FAQ Items"]),
-    partial_update=extend_schema(summary="Update FAQ item", tags=["FAQ Items"]),
-    destroy=extend_schema(summary="Delete FAQ item", tags=["FAQ Items"]),
+    retrieve=extend_schema(
+        summary="Retrieve FAQ item",
+        description="Returns one FAQ item by its id, with its group, translations and associations. "
+        "Called by the admin panel.",
+        tags=["FAQ Items"],
+    ),
+    create=extend_schema(
+        summary="Create FAQ item",
+        description="Creates a FAQ item with its question, answer, optional group and associations. "
+        "The url_key must be unique. Called by the admin panel.",
+        tags=["FAQ Items"],
+    ),
+    partial_update=extend_schema(
+        summary="Update FAQ item",
+        description="Changes the fields sent in the body. A group_idx of null ungroups the item and a list of "
+        "associations replaces the current ones. Called by the admin panel.",
+        tags=["FAQ Items"],
+    ),
+    destroy=extend_schema(
+        summary="Delete FAQ item",
+        description="Deletes the item with its translations and associations. Called by the admin panel.",
+        tags=["FAQ Items"],
+    ),
 )
 class ItemViewSet(viewsets.ViewSet):
     authentication_classes = [JWTAuthentication]
@@ -118,7 +140,12 @@ class ItemViewSet(viewsets.ViewSet):
             return Response({"detail": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(summary="Reorder FAQ items", tags=["FAQ Items"])
+    @extend_schema(
+        summary="Reorder FAQ items",
+        description="Sets the position of each item from the order of the id list in the body, either overall "
+        "or within its group. Called by the admin panel.",
+        tags=["FAQ Items"],
+    )
     @action(detail=False, methods=["patch"], url_path="reorder")
     def reorder(self, request: Request, channel_idx: str = None, **kwargs) -> Response:
         try:
@@ -130,7 +157,11 @@ class ItemViewSet(viewsets.ViewSet):
 
     # --- T9N ---
 
-    @extend_schema(summary="List item translations", tags=["FAQ Items"])
+    @extend_schema(
+        summary="List item translations",
+        description="Returns the translations of the item, one entry per language. Called by the admin panel.",
+        tags=["FAQ Items"],
+    )
     @action(detail=True, methods=["get"], url_path="translations", url_name="translations-list")
     def translations_list(self, request: Request, channel_idx: str = None, pk: int = None, **kwargs) -> Response:
         t9ns = item_service.list_item_translations(item_pk=pk)
@@ -146,7 +177,12 @@ class ItemViewSet(viewsets.ViewSet):
         ]
         return Response(results, status=status.HTTP_200_OK)
 
-    @extend_schema(summary="Create item translation", tags=["FAQ Items"])
+    @extend_schema(
+        summary="Create item translation",
+        description="Adds the question, answer and url_key of the item in one more language. "
+        "Called by the admin panel.",
+        tags=["FAQ Items"],
+    )
     @action(detail=True, methods=["post"], url_path="translations/create", url_name="translations-create")
     def translations_create(self, request: Request, channel_idx: str = None, pk: int = None, **kwargs) -> Response:
         try:
@@ -172,7 +208,11 @@ class ItemViewSet(viewsets.ViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-    @extend_schema(summary="Update item translation", tags=["FAQ Items"])
+    @extend_schema(
+        summary="Update item translation",
+        description="Changes the translated fields stored for the language in the path. Called by the admin panel.",
+        tags=["FAQ Items"],
+    )
     @action(
         detail=True, methods=["patch"], url_path=r"translations/(?P<language>[a-z]{2})", url_name="translations-update"
     )
@@ -196,7 +236,11 @@ class ItemViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK,
         )
 
-    @extend_schema(summary="Delete item translation", tags=["FAQ Items"])
+    @extend_schema(
+        summary="Delete item translation",
+        description="Removes the translation stored for the language in the path. Called by the admin panel.",
+        tags=["FAQ Items"],
+    )
     @action(
         detail=True,
         methods=["delete"],
