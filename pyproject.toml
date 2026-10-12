@@ -1,6 +1,6 @@
 [project]
 name = "entirius-django-faq"
-version = "2.0.0"
+version = "2.1.0"
 description = "FAQ module for Entirius: translated, channel-scoped questions and answers linked to products, categories and posts"
 keywords = ["django", "ecommerce", "entirius", "faq", "cms", "multilingual"]
 classifiers = [
