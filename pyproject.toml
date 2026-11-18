@@ -1,6 +1,6 @@
 [project]
 name = "entirius-django-faq"
-version = "2.1.0"
+version = "2.1.1"
 description = "FAQ module for Entirius: translated, channel-scoped questions and answers linked to products, categories and posts"
 keywords = ["django", "ecommerce", "entirius", "faq", "cms", "multilingual"]
 classifiers = [
@@ -25,7 +25,7 @@ dependencies = [
     "djangorestframework>=3.14",
     "djangorestframework-simplejwt>=5.3",
     "drf-spectacular>=0.27",
-    "Pillow>=10.0",
+    "Pillow>=13.0.0",
     "pydantic>=2.0",
     "entirius-django-utils>=2.0.0",
     "entirius-django-regional>=2.0.0",
